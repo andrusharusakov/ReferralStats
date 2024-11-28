@@ -4,7 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
 @Entity
-public class Referral {
+public class Referrals {
 
     @Id
     private Long referralId;

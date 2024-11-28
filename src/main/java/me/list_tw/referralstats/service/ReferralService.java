@@ -1,7 +1,7 @@
 package me.list_tw.referralstats.service;
 
-import me.list_tw.referralstats.model.Referral;
-import me.list_tw.referralstats.repository.ReferralRepository;
+import me.list_tw.referralstats.model.Referrals;
+import me.list_tw.referralstats.repository.ReferralsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +13,7 @@ import java.util.HashMap;
 public class ReferralService {
 
     @Autowired
-    private ReferralRepository referralRepository;
+    private ReferralsRepository referralRepository;
 
     private static final Map<String, Integer> subscriptionPrices = new HashMap<>();
     static {
@@ -26,7 +26,7 @@ public class ReferralService {
     }
 
     public Map<String, Object> getReferralStats(Long referralId) {
-        List<Referral> referrals = referralRepository.findByReferralId(referralId);
+        List<Referrals> referrals = referralRepository.findByReferralId(referralId);
 
         // Подсчёт пользователей, которые перешли и купили
         int transitioned = 0;
@@ -34,7 +34,7 @@ public class ReferralService {
         Map<String, Integer> subscriptionCounts = new HashMap<>();
         int totalAmount = 0;
 
-        for (Referral referral : referrals) {
+        for (Referrals referral : referrals) {
             if (referral.getSubscription() == null) {
                 transitioned++;
             } else {
