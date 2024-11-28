@@ -1,16 +1,18 @@
 package me.list_tw.referralstats.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-
-@Entity
 public class Referrals {
 
-    @Id
     private Long referralId;
     private Long invitedId;
     private String subscription;
     private Integer time;
+
+    public Referrals(Long referralId, Long invitedId, String subscription, Integer time) {
+        this.referralId = referralId;
+        this.invitedId = invitedId;
+        this.subscription = subscription;
+        this.time = time;
+    }
 
     public Long getReferralId() {
         return referralId;
