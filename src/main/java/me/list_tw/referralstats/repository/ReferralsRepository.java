@@ -8,6 +8,5 @@ import java.util.List;
 
 @Repository
 public interface ReferralsRepository extends JpaRepository<Referrals, Long> {
-
     List<Referrals> findByReferralId(Long referralId);
 }

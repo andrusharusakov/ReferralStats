@@ -1,8 +1,6 @@
 package me.list_tw.referralstats.service;
 
 import me.list_tw.referralstats.model.Referrals;
-import me.list_tw.referralstats.repository.ReferralsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,9 +9,6 @@ import java.util.HashMap;
 
 @Service
 public class ReferralService {
-
-    @Autowired
-    private ReferralsRepository referralRepository;
 
     private static final Map<String, Integer> subscriptionPrices = new HashMap<>();
     static {
@@ -25,10 +20,11 @@ public class ReferralService {
         subscriptionPrices.put("VPN Pro 365", 1745);
     }
 
+    // Мок-данные вместо работы с базой данных
     public Map<String, Object> getReferralStats(Long referralId) {
-        List<Referrals> referrals = referralRepository.findByReferralId(referralId);
+        // Здесь замените данные на жестко закодированные или из другого источника
+        List<Referrals> referrals = getFakeReferralData(referralId);
 
-        // Подсчёт пользователей, которые перешли и купили
         int transitioned = 0;
         int purchased = 0;
         Map<String, Integer> subscriptionCounts = new HashMap<>();
@@ -45,10 +41,8 @@ public class ReferralService {
             }
         }
 
-        // Рассчитываем долю партнёра
         double partnerShare = totalAmount * 0.5;
 
-        // Формируем данные для отображения
         Map<String, Object> stats = new HashMap<>();
         stats.put("transitioned", transitioned);
         stats.put("purchased", purchased);
@@ -57,5 +51,14 @@ public class ReferralService {
         stats.put("partnerShare", partnerShare);
 
         return stats;
+    }
+
+    // Метод для получения моковых данных
+    private List<Referrals> getFakeReferralData(Long referralId) {
+        // Возвращаем моковые данные для примера
+        return List.of(
+                new Referrals(referralId, 1L, "VPN Pro 30", 30),
+                new Referrals(referralId, 2L, "VPN Lite 180", 180)
+        );
     }
 }
