@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Referral Statistics</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<h1>Referral Statistics for Partner ID: <span th:text="${referralId}"></span></h1>
+
+<h2>Summary</h2>
+<p>Number of Users Who Clicked (Transitioned): <span th:text="${transitioned}"></span></p>
+<p>Number of Users Who Bought (Purchased): <span th:text="${purchased}"></span></p>
+
+<h2>Subscription Breakdown</h2>
+<table border="1">
+    <thead>
+    <tr>
+        <th>Subscription Type</th>
+        <th>Quantity</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="entry : ${subscriptionCounts}">
+        <td th:text="${entry.key}"></td>
+        <td th:text="${entry.value}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<h2>Total Earnings</h2>
+<p>Total Earnings from Subscriptions: <span th:text="${totalAmount}"></span> ₽</p>
+<p>Partner's Share (50%): <span th:text="${partnerShare}"></span> ₽</p>
+
+</body>
+</html>
