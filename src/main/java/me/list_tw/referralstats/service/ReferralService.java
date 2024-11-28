@@ -1,14 +1,25 @@
 package me.list_tw.referralstats.service;
 
 import me.list_tw.referralstats.model.Referrals;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
 @Service
 public class ReferralService {
+
+    private final DataSource dataSource;
+
+    // Получаем строку подключения к базе данных из конфигурации
+    public ReferralService(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     private static final Map<String, Integer> subscriptionPrices = new HashMap<>();
     static {
@@ -20,10 +31,9 @@ public class ReferralService {
         subscriptionPrices.put("VPN Pro 365", 1745);
     }
 
-    // Мок-данные вместо работы с базой данных
+    // Метод для получения статистики
     public Map<String, Object> getReferralStats(Long referralId) {
-        // Здесь замените данные на жестко закодированные или из другого источника
-        List<Referrals> referrals = getFakeReferralData(referralId);
+        List<Referrals> referrals = getReferralsFromDatabase(referralId);
 
         int transitioned = 0;
         int purchased = 0;
@@ -53,12 +63,32 @@ public class ReferralService {
         return stats;
     }
 
-    // Метод для получения моковых данных
-    private List<Referrals> getFakeReferralData(Long referralId) {
-        // Возвращаем моковые данные для примера
-        return List.of(
-                new Referrals(referralId, 1L, "VPN Pro 30", 30),
-                new Referrals(referralId, 2L, "VPN Lite 180", 180)
-        );
+    // Метод для получения данных из базы данных
+    private List<Referrals> getReferralsFromDatabase(Long referralId) {
+        List<Referrals> referrals = new ArrayList<>();
+
+        String query = "SELECT referralId, invitedId, subscription, time FROM referrals WHERE referralId = ?";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+
+            stmt.setLong(1, referralId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Long referralIdFromDb = rs.getLong("referralId");
+                    Long invitedId = rs.getLong("invitedId");
+                    String subscription = rs.getString("subscription");
+                    int time = rs.getInt("time");
+
+                    referrals.add(new Referrals(referralIdFromDb, invitedId, subscription, time));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Обработка ошибок
+        }
+
+        return referrals;
     }
 }
