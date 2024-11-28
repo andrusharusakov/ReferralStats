@@ -1,12 +1,10 @@
 package me.list_tw.referralstats.service;
 
 import me.list_tw.referralstats.model.Referrals;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.sql.DataSource;
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -14,11 +12,11 @@ import java.util.HashMap;
 @Service
 public class ReferralService {
 
-    private final DataSource dataSource;
+    private final JdbcTemplate jdbcTemplate;
 
-    // Получаем строку подключения к базе данных из конфигурации
-    public ReferralService(DataSource dataSource) {
-        this.dataSource = dataSource;
+    @Autowired
+    public ReferralService(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final Map<String, Integer> subscriptionPrices = new HashMap<>();
@@ -65,30 +63,15 @@ public class ReferralService {
 
     // Метод для получения данных из базы данных
     private List<Referrals> getReferralsFromDatabase(Long referralId) {
-        List<Referrals> referrals = new ArrayList<>();
+        String sql = "SELECT referralId, invitedId, subscription, time FROM referrals WHERE referralId = ?";
 
-        String query = "SELECT referralId, invitedId, subscription, time FROM referrals WHERE referralId = ?";
+        return jdbcTemplate.query(sql, new Object[] { referralId }, (rs, rowNum) -> {
+            Long referralIdFromDb = rs.getLong("referralId");
+            Long invitedId = rs.getLong("invitedId");
+            String subscription = rs.getString("subscription");
+            int time = rs.getInt("time");
 
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(query)) {
-
-            stmt.setLong(1, referralId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Long referralIdFromDb = rs.getLong("referralId");
-                    Long invitedId = rs.getLong("invitedId");
-                    String subscription = rs.getString("subscription");
-                    int time = rs.getInt("time");
-
-                    referrals.add(new Referrals(referralIdFromDb, invitedId, subscription, time));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Обработка ошибок
-        }
-
-        return referrals;
+            return new Referrals(referralIdFromDb, invitedId, subscription, time);
+        });
     }
 }
